@@ -1,290 +1,45 @@
-.nft-detail {
-  padding: 40px 0 80px;
+.nft-detail { padding: 40px 0; }
+.nft-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.nft-image-wrapper { border-radius: var(--radius-lg); overflow: hidden; }
+.nft-image-wrapper img { width: 100%; display: block; }
+.nft-collection { color: var(--accent-purple); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+.nft-title { font-family: var(--font-display); font-size: 32px; margin-bottom: 24px; }
+.nft-creators { display: flex; gap: 32px; margin-bottom: 24px; }
+.creator-info { display: flex; align-items: center; gap: 12px; }
+.creator-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.creator-info .label { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+.creator-info .address { font-size: 14px; color: var(--text-secondary); }
+.price-section { padding: 24px; border-radius: var(--radius-lg); margin-bottom: 24px; }
+.price-section .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
+.price { font-family: var(--font-display); font-size: 28px; margin: 8px 0 16px; }
+.btn-buy {
+  width: 100%; padding: 16px; border: none; border-radius: var(--radius-md);
+  background: var(--gradient-primary); color: white; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.3s, transform 0.2s;
 }
-
-.nft-detail__layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 50px;
-  align-items: start;
+.btn-buy:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-buy:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.bid-input-row { display: flex; gap: 12px; }
+.bid-input-row input {
+  flex: 1; padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-glass);
+  background: var(--bg-secondary); color: white; font-size: 16px; outline: none;
 }
-
-/* Image */
-.nft-detail__image-card {
-  position: relative;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  position: sticky;
-  top: 100px;
+.bid-input-row .btn-buy { flex: 1; }
+.tx-status { margin-top: 12px; padding: 12px; border-radius: var(--radius-sm); font-size: 14px; }
+.tx-status.success { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.tx-status.error { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.nft-tabs { border-radius: var(--radius-lg); overflow: hidden; }
+.tab-headers { display: flex; border-bottom: 1px solid var(--border-glass); }
+.tab-btn {
+  flex: 1; padding: 14px; border: none; background: transparent;
+  color: var(--text-secondary); cursor: pointer; font-size: 14px; transition: all 0.3s;
 }
-
-.nft-detail__image {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  display: block;
-}
-
-.nft-detail__image-glow {
-  position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 60px rgba(168, 85, 247, 0.08);
-  pointer-events: none;
-}
-
-/* Info */
-.nft-detail__collection {
-  font-size: 0.8rem;
-  color: var(--accent-cyan);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.nft-detail__title {
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  margin: 8px 0 24px;
-}
-
-.nft-detail__meta {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 30px;
-}
-
-.nft-detail__meta-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nft-detail__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-}
-
-.nft-detail__avatar--owner {
-  background: var(--gradient-secondary);
-}
-
-.nft-detail__meta-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.nft-detail__meta-value {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* Price card */
-.nft-detail__price-card {
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.nft-detail__price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 20px 0;
-}
-
-.nft-detail__price-label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.nft-detail__price-value {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 800;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Bid input */
-.nft-detail__bid-input-wrapper {
-  display: flex;
-  gap: 12px;
-  padding: 8px;
-  border-radius: var(--radius-xl);
-}
-
-.nft-detail__bid-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-primary);
-  font-family: var(--font-primary);
-  font-size: 1rem;
-  padding: 12px 16px;
-}
-
-.nft-detail__bid-input::placeholder {
-  color: var(--text-muted);
-}
-
-/* Buttons */
-.nft-detail__btn {
-  padding: 14px 32px;
-  border: none;
-  border-radius: var(--radius-xl);
-  font-family: var(--font-primary);
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.3s;
-}
-
-.nft-detail__btn--primary {
-  background: var(--gradient-primary);
-  color: #fff;
-}
-
-.nft-detail__btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4);
-}
-
-.nft-detail__btn--full {
-  width: 100%;
-}
-
-/* Tabs */
-.nft-detail__tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 16px;
-  background: var(--bg-glass);
-  border-radius: var(--radius-xl);
-  padding: 4px;
-  border: 1px solid var(--border-glass);
-}
-
-.nft-detail__tab {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-primary);
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.nft-detail__tab.active {
-  background: var(--gradient-primary);
-  color: #fff;
-}
-
-.nft-detail__tab-content {
-  border-radius: var(--radius-lg);
-  padding: 20px;
-}
-
-/* Details */
-.nft-detail__detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-glass);
-  font-size: 0.9rem;
-}
-
-.nft-detail__detail-row:last-child {
-  border-bottom: none;
-}
-
-.nft-detail__detail-row span:first-child {
-  color: var(--text-secondary);
-}
-
-/* Bids */
-.nft-detail__bid-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-glass);
-}
-
-.nft-detail__bid-row:last-child {
-  border-bottom: none;
-}
-
-.nft-detail__bid-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--gradient-secondary);
-  flex-shrink: 0;
-}
-
-.nft-detail__bid-info {
-  flex: 1;
-}
-
-.nft-detail__bid-address {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.nft-detail__bid-time {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.nft-detail__bid-amount {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-/* History */
-.nft-detail__history-item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-glass);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.nft-detail__history-item:last-child {
-  border-bottom: none;
-}
-
-.nft-detail__history-item span {
-  margin-right: 8px;
-}
-
-/* Responsive */
+.tab-btn.active { color: white; background: rgba(168, 85, 247, 0.15); }
+.tab-content { padding: 20px; }
+.details-grid { display: flex; flex-direction: column; gap: 12px; }
+.detail-row { display: flex; justify-content: space-between; font-size: 14px; }
+.detail-row span:first-child { color: var(--text-secondary); }
+.tab-empty { color: var(--text-muted); text-align: center; padding: 20px; }
 @media (max-width: 768px) {
-  .nft-detail__layout {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-  .nft-detail__image-card {
-    position: static;
-  }
-  .nft-detail__meta {
-    flex-direction: column;
-    gap: 16px;
-  }
-  .nft-detail__bid-input-wrapper {
-    flex-direction: column;
-  }
+  .nft-detail-grid { grid-template-columns: 1fr; }
 }

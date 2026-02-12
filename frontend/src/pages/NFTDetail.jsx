@@ -1,212 +1,213 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import AuctionTimer from "../components/AuctionTimer";
-import MaskText from "../components/MaskText";
 import { useWeb3 } from "../context/Web3Context";
+import { useContracts } from "../hooks/useContracts";
 import { DEMO_NFTS } from "../utils/constants";
-import { formatAddress } from "../utils/helpers";
 import "./NFTDetail.css";
 
-const NFTDetail = () => {
+export default function NFTDetail() {
   const { id } = useParams();
-  const { account, connectWallet } = useWeb3();
+  const { account, connectWallet, shortenAddress } = useWeb3();
+  const { buyNFT, placeBid } = useContracts();
+  const [loading, setLoading] = useState(false);
+  const [txStatus, setTxStatus] = useState(null);
   const [bidAmount, setBidAmount] = useState("");
   const [activeTab, setActiveTab] = useState("details");
 
-  const nft = DEMO_NFTS.find((n) => n.id === parseInt(id)) || DEMO_NFTS[0];
+  const nft = DEMO_NFTS.find((n) => n.id === parseInt(id));
+  if (!nft) return <div className="container"><h2>NFT not found</h2></div>;
 
-  const bidHistory = [
-    { bidder: "0xAb58...eC9B", amount: "2.10", time: "2 hours ago" },
-    { bidder: "0x1234...5678", amount: "1.85", time: "5 hours ago" },
-    { bidder: "0xabcd...abcd", amount: "1.50", time: "8 hours ago" },
-    { bidder: "0x9876...5432", amount: "1.20", time: "12 hours ago" },
-  ];
-
-  const handleBuy = async () => {
+  const handleBuyNow = async () => {
     if (!account) {
-      connectWallet();
+      await connectWallet();
       return;
     }
-    alert("Purchase flow: connect to smart contract here");
+
+    setLoading(true);
+    setTxStatus(null);
+
+    try {
+      // For demo NFTs, the listingId matches the NFT id
+      const result = await buyNFT(nft.id, nft.price);
+
+      if (result.success) {
+        setTxStatus({
+          type: "success",
+          message: `NFT purchased! TX: ${result.hash.slice(0, 10)}...`,
+        });
+      } else {
+        setTxStatus({
+          type: "error",
+          message: result.error,
+        });
+      }
+    } catch (err) {
+      setTxStatus({
+        type: "error",
+        message: err.message || "Transaction failed",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleBid = async () => {
+  const handlePlaceBid = async () => {
     if (!account) {
-      connectWallet();
+      await connectWallet();
       return;
     }
     if (!bidAmount || parseFloat(bidAmount) <= 0) {
-      alert("Enter a valid bid amount");
+      setTxStatus({ type: "error", message: "Enter a valid bid amount" });
       return;
     }
-    alert(`Bid of ${bidAmount} ETH placed! (connect to smart contract)`);
+
+    setLoading(true);
+    setTxStatus(null);
+
+    try {
+      const result = await placeBid(nft.id, bidAmount);
+      if (result.success) {
+        setTxStatus({
+          type: "success",
+          message: `Bid placed! TX: ${result.hash.slice(0, 10)}...`,
+        });
+        setBidAmount("");
+      } else {
+        setTxStatus({ type: "error", message: result.error });
+      }
+    } catch (err) {
+      setTxStatus({ type: "error", message: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="nft-detail container">
-      <div className="nft-detail__layout">
-        {/* Left - Image */}
-        <motion.div
-          className="nft-detail__image-section"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="nft-detail__image-card glass">
-            <img src={nft.image} alt={nft.name} className="nft-detail__image" />
-            <div className="nft-detail__image-glow" />
+      <div className="nft-detail-grid">
+        {/* Left: Image */}
+        <div className="nft-image-section">
+          <div className="nft-image-wrapper">
+            <img src={nft.image} alt={nft.name} />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Right - Info */}
-        <motion.div
-          className="nft-detail__info-section"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <span className="nft-detail__collection">{nft.collection}</span>
-          <MaskText text={nft.name} className="nft-detail__title" tag="h1" />
+        {/* Right: Info */}
+        <div className="nft-info-section">
+          <p className="nft-collection">{nft.collection}</p>
+          <h1 className="nft-title">{nft.name}</h1>
 
-          <div className="nft-detail__meta">
-            <div className="nft-detail__meta-item">
-              <div className="nft-detail__avatar" />
+          <div className="nft-creators">
+            <div className="creator-info">
+              <div className="creator-avatar" style={{ background: "#4ade80" }} />
               <div>
-                <span className="nft-detail__meta-label">Creator</span>
-                <span className="nft-detail__meta-value">{formatAddress(nft.creator)}</span>
+                <span className="label">CREATOR</span>
+                <span className="address">{shortenAddress(nft.creator)}</span>
               </div>
             </div>
-            <div className="nft-detail__meta-item">
-              <div className="nft-detail__avatar nft-detail__avatar--owner" />
+            <div className="creator-info">
+              <div className="creator-avatar" style={{ background: "#f472b6" }} />
               <div>
-                <span className="nft-detail__meta-label">Owner</span>
-                <span className="nft-detail__meta-value">{formatAddress(nft.owner)}</span>
+                <span className="label">OWNER</span>
+                <span className="address">{shortenAddress(nft.owner)}</span>
               </div>
             </div>
           </div>
 
-          {/* Price / Auction */}
-          <div className="nft-detail__price-card glass">
+          {/* Price / Buy */}
+          <div className="price-section glass">
             {nft.isAuction ? (
               <>
-                <AuctionTimer endTime={nft.endTime} />
-                <div className="nft-detail__price-row">
-                  <div>
-                    <span className="nft-detail__price-label">Current Bid</span>
-                    <span className="nft-detail__price-value">
-                      <span className="eth-icon">Ξ</span> {nft.highestBid} ETH
-                    </span>
-                  </div>
-                </div>
-                <div className="nft-detail__bid-input-wrapper glass">
+                <span className="label">HIGHEST BID</span>
+                <div className="price">Ξ {nft.highestBid} ETH</div>
+                <div className="bid-input-row">
                   <input
                     type="number"
                     step="0.01"
-                    placeholder="Enter bid amount (ETH)"
+                    placeholder="Your bid in ETH"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
-                    className="nft-detail__bid-input"
+                    disabled={loading}
                   />
-                  <button className="nft-detail__btn nft-detail__btn--primary" onClick={handleBid}>
-                    Place Bid 🔥
+                  <button
+                    className="btn-buy"
+                    onClick={handlePlaceBid}
+                    disabled={loading}
+                  >
+                    {loading ? "Placing Bid..." : "Place Bid"}
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <div className="nft-detail__price-row">
-                  <div>
-                    <span className="nft-detail__price-label">Price</span>
-                    <span className="nft-detail__price-value">
-                      <span className="eth-icon">Ξ</span> {nft.price} ETH
-                    </span>
-                  </div>
-                </div>
-                <button className="nft-detail__btn nft-detail__btn--primary nft-detail__btn--full" onClick={handleBuy}>
-                  {account ? "Buy Now" : "Connect Wallet to Buy"}
+                <span className="label">PRICE</span>
+                <div className="price">Ξ {nft.price} ETH</div>
+                <button
+                  className="btn-buy"
+                  onClick={handleBuyNow}
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : account ? "Buy Now" : "Connect Wallet to Buy"}
                 </button>
               </>
+            )}
+
+            {/* Transaction Status */}
+            {txStatus && (
+              <div className={`tx-status ${txStatus.type}`}>
+                {txStatus.type === "success" ? "✅" : "❌"} {txStatus.message}
+              </div>
             )}
           </div>
 
           {/* Tabs */}
-          <div className="nft-detail__tabs">
-            {["details", "bids", "history"].map((tab) => (
-              <button
-                key={tab}
-                className={`nft-detail__tab ${activeTab === tab ? "active" : ""}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+          <div className="nft-tabs glass">
+            <div className="tab-headers">
+              {["details", "bids", "history"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`tab-btn ${activeTab === tab ? "active" : ""}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div className="tab-content">
+              {activeTab === "details" && (
+                <div className="details-grid">
+                  <div className="detail-row">
+                    <span>Contract</span>
+                    <span className="gradient-text">0x1234...5678</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Token ID</span>
+                    <span>#{nft.id}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Blockchain</span>
+                    <span>Ethereum</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Token Standard</span>
+                    <span>ERC-721</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Royalty</span>
+                    <span>2.5%</span>
+                  </div>
+                </div>
+              )}
+              {activeTab === "bids" && (
+                <p className="tab-empty">No bids yet</p>
+              )}
+              {activeTab === "history" && (
+                <p className="tab-empty">No history available</p>
+              )}
+            </div>
           </div>
-
-          <div className="nft-detail__tab-content glass">
-            {activeTab === "details" && (
-              <div className="nft-detail__details">
-                <div className="nft-detail__detail-row">
-                  <span>Contract</span>
-                  <span className="gradient-text">0x1234...5678</span>
-                </div>
-                <div className="nft-detail__detail-row">
-                  <span>Token ID</span>
-                  <span>#{nft.id}</span>
-                </div>
-                <div className="nft-detail__detail-row">
-                  <span>Blockchain</span>
-                  <span>Ethereum</span>
-                </div>
-                <div className="nft-detail__detail-row">
-                  <span>Token Standard</span>
-                  <span>ERC-721</span>
-                </div>
-                <div className="nft-detail__detail-row">
-                  <span>Royalty</span>
-                  <span>2.5%</span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "bids" && (
-              <div className="nft-detail__bids">
-                {bidHistory.map((bid, i) => (
-                  <motion.div
-                    key={i}
-                    className="nft-detail__bid-row"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    <div className="nft-detail__bid-avatar" />
-                    <div className="nft-detail__bid-info">
-                      <span className="nft-detail__bid-address">{bid.bidder}</span>
-                      <span className="nft-detail__bid-time">{bid.time}</span>
-                    </div>
-                    <span className="nft-detail__bid-amount gradient-text">
-                      Ξ {bid.amount}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === "history" && (
-              <div className="nft-detail__history">
-                <div className="nft-detail__history-item">
-                  <span>🎨</span> Minted by {formatAddress(nft.creator)}
-                </div>
-                <div className="nft-detail__history-item">
-                  <span>📋</span> Listed for sale at Ξ {nft.price}
-                </div>
-              </div>
-            )}
-          </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default NFTDetail;
+}
